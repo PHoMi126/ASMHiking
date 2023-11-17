@@ -2,6 +2,7 @@ package com.example.asm_hiking.db;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.widget.Toast;
@@ -38,7 +39,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         COLUMN_PARKING + " TEXT," +
                         COLUMN_LENGTH + " TEXT," +
                         COLUMN_DIFFICULTY + " TEXT," +
-                        COLUMN_DESCRIPTION + " TEXT)";
+                        COLUMN_DESCRIPTION + " TEXT);";
         db.execSQL(query);
     }
 
@@ -48,7 +49,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void addHikeSession(String location, int date, String parking, String length, String difficulty, String desc) {
+    public void addHikeSession(String location, String date, String parking, String length, String difficulty, String desc) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
 
@@ -61,9 +62,50 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         long result = db.insert(TABLE_NAME, null, cv);
         if (result == -1) { //App failed to insert data
-            Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Failed.", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(context, "Added successfully!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public Cursor readAllData() {
+        //SQL query
+        String query = "SELECT * FROM " + TABLE_NAME;
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = null;
+        if(db != null){
+            cursor = db.rawQuery(query, null);
+        }
+        return cursor;
+    }
+
+    public void updateData(String row_id, String location, String date, String parking, String length, String difficulty, String desc) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+
+        cv.put(COLUMN_LOCATION, location);
+        cv.put(COLUMN_DATE, date);
+        cv.put(COLUMN_PARKING, parking);
+        cv.put(COLUMN_LENGTH, length);
+        cv.put(COLUMN_DIFFICULTY, difficulty);
+        cv.put(COLUMN_DESCRIPTION, desc);
+
+        long result = db.update(TABLE_NAME, cv, COLUMN_ID + " =? ", new String[]{row_id});
+        if (result == -1) { //App failed to update data
+            Toast.makeText(context, "Failed.", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(context, "Updated successfully!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void deleteOneRow(String row_id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        long result = db.delete(TABLE_NAME, COLUMN_ID + " =? ", new String[]{row_id});
+        if (result == -1) { //App failed to delete data
+            Toast.makeText(context, "Failed.", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(context, "Deleted successfully!", Toast.LENGTH_SHORT).show();
         }
     }
 }
